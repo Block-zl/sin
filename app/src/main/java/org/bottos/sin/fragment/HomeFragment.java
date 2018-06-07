@@ -4,111 +4,118 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Toast;
 
+import org.bottos.sin.activity.BaseActivity;
+import org.bottos.sin.activity.MainActivity;
 import org.bottos.sin.activity.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.support.constraint.Constraints.TAG;
 
 /**
  * 圈子
  */
 
 public class HomeFragment extends Fragment {
-
-    private TabLayout tab;
-    private ArrayList<String> tabIndicators;
-    private List<Fragment> tabFragments;
-    List<String> mData;
+    private View view;
+    private Toolbar toolbar;
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
+    private List<Fragment> fragments = new ArrayList<Fragment>();
+    private String[] tabTitleK = new String[]{"top", "shehui", "guonei", "guoji", "yule", "tiyu", "junshi", "keji", "caijing", "shishang"};
+    private String[] tabTitle = new String[]{"默认", "社会", "国内", "国际", "娱乐", "体育", "军事", "科技", "财经", "时尚"};
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        initData(50);
-        initView(view);
+        initView();
+
         return view;
     }
 
-    private void initData(int pager) {
-        mData = new ArrayList<>();
-        for (int i = 1; i < 50; i++) {
-            mData.add("pager" + pager + " 第" + i + "个item");
-        }
-    }
-
-    private void initView(View view){
-        //设置TabLayout
-        tab = (TabLayout) view.findViewById(R.id.tab);
-        for (int i = 1; i < 4; i++) {
-            tab.addTab(tab.newTab().setText("TAB" + i));
-        }
-        //TabLayout的切换监听
-        tab.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+    private void initView(){
+        toolbar = view.findViewById(R.id.toolbar);
+        setHasOptionsMenu(true);
+        ((MainActivity) getActivity()).setSupportActionBar(toolbar);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                //切换的时候更新RecyclerView
-                initData(tab.getPosition()+1);
-                mAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.add:
+                        Toast.makeText(getActivity(), "收藏", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.search:
+                        Toast.makeText(getActivity(), "分享", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                return true;
             }
         });
-        //设置RecycleView
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity(), LinearLayoutManager.VERTICAL, false));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(mAdapter);
+
+        //设置TabLayout
+        mTabLayout = view.findViewById(R.id.tab);
+        mViewPager = view.findViewById(R.id.viewPager);
+        for (int i = 0; i < tabTitle.length; i++) {
+            fragments.add(HomeContentFragment.newInstance(tabTitleK[i]));
+        }
+        for (int i = 0; i < tabTitle.length; i++) {
+            mTabLayout.addTab(mTabLayout.newTab().setText(tabTitle[i]));
+        }
+        FragmentPagerAdapter mAdapter = new FragmentPagerAdapter(this.getActivity().getSupportFragmentManager()) {
+            @Override
+            public Fragment getItem(int position) {
+                return fragments.get(position);
+            }
+
+            @Override
+            public int getCount() {
+                return fragments.size();
+            }
+            //ViewPager与TabLayout绑定后，这里获取到PageTitle就是Tab的Text
+            @Override
+            public CharSequence getPageTitle(int position) {
+                return tabTitle[position];
+            }
+        };
+        mViewPager.setAdapter(mAdapter);
+        mTabLayout.setupWithViewPager(mViewPager);//将TabLayout和ViewPager关联起来。
+        mTabLayout.setTabsFromPagerAdapter(mAdapter);//给Tabs设置适配器
     }
 
-    private RecyclerView.Adapter mAdapter = new RecyclerView.Adapter<MyViewHolder>() {
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.toobar_home, menu);
+    }
 
-
-        @Override
-        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new MyViewHolder(getLayoutInflater().inflate(R.layout.item_layout, parent, false));
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                ((MainActivity)getActivity()).menuControl();
+                break;
+            case R.id.add:
+                Toast.makeText(getActivity(), "add", Toast.LENGTH_LONG);
+                break;
+            case R.id.search:
+                Toast.makeText(getActivity(), "search", Toast.LENGTH_LONG);
+                break;
         }
-
-        @Override
-        public void onBindViewHolder(MyViewHolder holder, int position) {
-            holder.tv.setText(mData.get(position));
-        }
-
-        @Override
-        public int getItemCount() {
-            return mData.size();
-        }
-    };
-
-    class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView tv;
-
-        public MyViewHolder(View itemView) {
-            super(itemView);
-            tv = (TextView) itemView.findViewById(R.id.tv);
-        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

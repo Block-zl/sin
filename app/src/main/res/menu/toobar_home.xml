@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_menu_search"
+        android:orderInCategory="60"
+        android:title="搜索"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/add"
+        android:icon="@drawable/ic_men_add"
+        android:orderInCategory="70"
+        android:title="发布"
+        app:showAsAction="always"/>
+
+
+
+
+</menu>
