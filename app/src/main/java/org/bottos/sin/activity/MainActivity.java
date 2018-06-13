@@ -81,6 +81,11 @@ public class MainActivity extends BaseActivity {
         fragmentTransaction.add(R.id.main_view, homeFragment).commit();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
     private void hideFrag() {
         //再重新获取一个开启事务
         FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();

@@ -44,14 +44,14 @@ public class FargmentHomeAdapter extends RecyclerView.Adapter<FargmentHomeAdapte
         holder.totalViews.setText(datas.get(position).getTotalViews());
         holder.duration.setText(datas.get(position).getDuration());
 
-        RequestOptions options = new RequestOptions()
-                .centerCrop()
-                .transform(new GlideTopRoundTransformation(5));
+//        RequestOptions options = new RequestOptions()
+//                .centerCrop()
+//                .transform(new GlideTopRoundTransformation(5));
 
         Glide.with(context)
                 .load(datas.get(position).getImage())
                 .transition(withCrossFade())
-                .apply(options)
+//                .apply(options)
                 .into(holder.imageView);
     }
 

@@ -1,11 +1,13 @@
 package org.bottos.sin.activity;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.LayoutRes;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -16,6 +18,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 import java.util.ArrayList;
@@ -30,20 +33,22 @@ public abstract class BaseActivity extends AppCompatActivity
 
     protected DrawerLayout mRootView;
     protected FrameLayout flActivityContainer;
+    protected BottomNavigationView bottomNav;
     private Toast mToast;
-    private Fragment mFragment;
     private List<TurnBackListener> mTurnBackListeners = new ArrayList<>();
+    public Boolean navIsShow = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        setNavigationMenuLineStyle(navigationView, Color.parseColor("#F3F3F3"), 20);
-
         initDatas();
         initViews();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     @LayoutRes
@@ -53,6 +58,10 @@ public abstract class BaseActivity extends AppCompatActivity
      * 初始化 View， 调用位置在 initDatas 之后
      */
     protected void initViews() {
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        bottomNav = findViewById(R.id.navigation);
+        navigationView.setNavigationItemSelectedListener(this);
+//        setNavigationMenuLineStyle(navigationView, Color.parseColor("#F3F3F3"), 20);
         flActivityContainer = findViewById(R.id.activity_container);
         flActivityContainer.addView(LayoutInflater.from(this).inflate(setLayoutId(), flActivityContainer, false));
         mRootView = findViewById(R.id.drawer_layout);
@@ -78,7 +87,7 @@ public abstract class BaseActivity extends AppCompatActivity
             Timer timer = new Timer();
             timer.schedule(task, 250);
         } else if (id == R.id.nav_gallery) {
-
+            showOrHideNavAnim();
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -101,63 +110,43 @@ public abstract class BaseActivity extends AppCompatActivity
         }
     }
 
-    public void closeMenu() {
-
-    }
-
-    protected void clearOldFragment() {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
-        if (transaction == null || fragments == null || fragments.size() == 0)
-            return;
-        boolean doCommit = false;
-        for (Fragment fragmentOld : fragments) {
-            if (fragmentOld != null) {
-                transaction.remove(fragmentOld);
-                doCommit = true;
-            }
+    private void showOrHideNavAnim() {
+        if(navIsShow) {
+            hideBottomNav();
+        } else {
+            showBottomNav();
         }
-        if (doCommit)
-            transaction.commitNow();
+
     }
 
-    protected void clearOldFragment(Fragment fragment) {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
-        if (transaction == null || fragments == null || fragments.size() == 0)
-            return;
-        boolean doCommit = false;
-        for (Fragment fragmentOld : fragments) {
-            if (fragmentOld != fragment && fragmentOld != null) {
-                transaction.remove(fragmentOld);
-                doCommit = true;
+
+    private void showBottomNav() {
+        ValueAnimator va = ValueAnimator.ofFloat(bottomNav.getY(), bottomNav.getY()-bottomNav.getHeight());
+        va.setDuration(200);
+        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                bottomNav.setY((Float) valueAnimator.getAnimatedValue());
             }
-        }
-        if (doCommit)
-            transaction.commitNow();
+        });
+        va.start();
+        navIsShow = true;
     }
 
-    protected void addFragment(int frameLayoutId, Fragment fragment) {
-        if (fragment != null) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            if (fragment.isAdded()) {
-                if (mFragment != null) {
-                    transaction.hide(mFragment).show(fragment);
-                } else {
-                    transaction.show(fragment);
-                }
-            } else {
-                if (mFragment != null) {
-                    transaction.hide(mFragment).add(frameLayoutId, fragment);
-                } else {
-                    transaction.add(frameLayoutId, fragment);
-                }
+    private void hideBottomNav() {
+        ValueAnimator va = ValueAnimator.ofFloat(bottomNav.getY(), bottomNav.getY() + bottomNav.getHeight());
+        va.setDuration(200);
+        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                bottomNav.setY((Float) valueAnimator.getAnimatedValue());
             }
-            mFragment = fragment;
-            transaction.commit();
-            getSupportFragmentManager().executePendingTransactions();
-        }
+        });
+
+        va.start();
+        navIsShow = false;
     }
+
 
     public void toastShort(String text) {
         toast(text, Toast.LENGTH_SHORT);
