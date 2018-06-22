@@ -61,7 +61,7 @@ public abstract class BaseActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         bottomNav = findViewById(R.id.navigation);
         navigationView.setNavigationItemSelectedListener(this);
-//        setNavigationMenuLineStyle(navigationView, Color.parseColor("#F3F3F3"), 20);
+        setNavigationMenuLineStyle(navigationView, Color.parseColor("#F3F3F3"), 20);
         flActivityContainer = findViewById(R.id.activity_container);
         flActivityContainer.addView(LayoutInflater.from(this).inflate(setLayoutId(), flActivityContainer, false));
         mRootView = findViewById(R.id.drawer_layout);
